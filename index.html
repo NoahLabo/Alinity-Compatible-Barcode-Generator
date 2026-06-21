@@ -303,13 +303,22 @@
             text-align: center;
             max-width: 650px;
             margin: 20px auto 10px auto;
-            font-size: 11px;
+            font-size: 0.8rem;
             color: #AAAAAA;
             line-height: 1.4;
+            opacity: 0.8;
         }
 
         .disclaimer strong {
             color: #FFAB00;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 15px;
+            opacity: 0.8;
         }
 
         /* Buy Me a Coffee link */
@@ -637,8 +646,9 @@
 
                             <label class="rack-option">
                                 <input
-                                    type="checkbox"
-                                    class="rack-checkbox"
+                                    type="radio"
+                                    class="rack-radio"
+                                    name="rackType"
                                     value="Vial"
                                 >
                                 Vial rack
@@ -646,8 +656,9 @@
 
                             <label class="rack-option">
                                 <input
-                                    type="checkbox"
-                                    class="rack-checkbox"
+                                    type="radio"
+                                    class="rack-radio"
+                                    name="rackType"
                                     value="Sample"
                                 >
                                 Sample rack
@@ -658,8 +669,8 @@
                 </tr>
 
                 <tr>
-                    <td><label for="productName">Product Name <span style="color:red;">*</span></label></td>
-                    <td><input type="text" id="productName" required></td>
+                    <td><label for="productName">Product Name</label></td>
+                    <td><input type="text" id="productName"></td>
                 </tr>
 
                 <tr>
@@ -719,11 +730,11 @@
                 </tr>
 
                 <tr>
-                    <td><label for="expiryDate">Expiration Date (optional)</label></td>
+                    <td><label for="expiryDate">Expiration Date</label></td>
                     <td><input type="tel" id="expiryDate" inputmode="numeric" placeholder="MM/DD/YYYY" maxlength="10"></td>
                 </tr>
                 <tr>
-                    <td><label for="openStability">Open Stability (optional)</label></td>
+                    <td><label for="openStability">Open Stability</label></td>
                     <td><input type="text" id="openStability"></td>
                 </tr>
 
@@ -737,17 +748,18 @@
                         <div class="printmode-grid">
                             <label class="printmode-option">
                                 <input
-                                    type="checkbox"
+                                    type="radio"
                                     name="printMode"
                                     value="avery"
                                     id="printModeAvery"
+                                    checked
                                 >
                                 Full Sheet
                             </label>
 
                             <label class="printmode-option">
                                 <input
-                                    type="checkbox"
+                                    type="radio"
                                     name="printMode"
                                     value="thermal"
                                     id="printModeThermal"
@@ -808,27 +820,13 @@
                 </tr>
 
             </table>
-
             <div class="button-row">
-                <button type="button" id="generateBtn" disabled>Generate Barcodes</button>
+                <button type="button" id="generateBtn">Generate Barcodes</button>
                 <button type="button" id="resetBtn">Reset</button>
             </div>
             <p class="print-instruction">
                 Print using <strong>Actual Size / 100% scale</strong> for proper Avery 5195 label alignment.
             </p>
-        </div>
-
-        <div class="copyright">
-            © 2026 NoahLabo. All rights reserved.
-        </div>
-
-        <div class="disclaimer">
-            <strong>Disclaimer:</strong>
-            This tool generates barcode labels for reference purposes only. Users are responsible for verifying all product information, lot numbers, and expiry dates before printing or using any generated labels. The author assumes no responsibility for any errors, omissions, or misuse of this tool or its outputs.
-
-            <br><br>
-
-            This is an independent utility and is not affiliated with, endorsed by, or sponsored by Abbott Laboratories. Alinity is a trademark of Abbott Laboratories.
         </div>
 
         <div class="coffee-link">
@@ -840,9 +838,18 @@
             </a>
         </div>
 
-        <!--div class="attribution">
-            Barcodes powered by <a href="https://github.com/metafloor/bwip-js" target="_blank">bwip-js</a> and PDF generation by <a href="https://github.com/parallax/jsPDF" target="_blank">jsPDF</a>.
-        </div-->
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong>
+            This tool generates barcode labels for reference purposes only. Users are responsible for verifying all product information, lot numbers, and expiry dates before printing or using any generated labels. The author assumes no responsibility for any errors, omissions, or misuse of this tool or its outputs.
+
+            <br><br>
+
+            This is an independent utility and is not affiliated with, endorsed by, or sponsored by Abbott Laboratories. Alinity is a trademark of Abbott Laboratories.
+        </div>
+
+        <div class="copyright">
+            © 2026 Labpals. All rights reserved.
+        </div>
 
         <div id="lotHelpModal" class="modal">
             <div class="modal-content">
@@ -908,11 +915,25 @@
             const showBorderCheckbox = dom.showBorder;
 
             const generateBtn = dom.generateBtn;
-            const rackCheckboxes =
-                document.querySelectorAll('.rack-checkbox');
+            const rackRadios =
+                document.querySelectorAll('.rack-radio');
+
+            const lastRackType =
+                localStorage.getItem('lastRackType');
+
+            if (lastRackType) {
+
+                rackRadios.forEach(rb => {
+
+                    if (rb.value === lastRackType) {
+                        rb.checked = true;
+                    }
+
+                });
+
+            }
 
             const requiredFields = [
-                dom.productName,
                 dom.lotNumber
             ];
 
@@ -924,10 +945,8 @@
             const AVERY_LABEL_COLGAP = 0.3;
             const AVERY_LABEL_MARGINTOP = 0.55;
 
-                        
+                       
             // Print mode controls
-            const printModeCheckboxes =
-                document.querySelectorAll('input[name="printMode"]');
             const printModeAvery = dom.printModeAvery;
             const printModeThermal = dom.printModeThermal;
             const thermalSettings = dom.thermalSettings;
@@ -939,52 +958,27 @@
             // Update UI
             function updatePrintModeUI() {
 
-                // Only one checkbox selected at a time
                 if (printModeAvery.checked) {
 
-                    printModeThermal.checked = false;
-
                     thermalSettings.style.display = 'none';
-
                     averyInfo.style.display = 'block';
-
-                } else if (printModeThermal.checked) {
-
-                    printModeAvery.checked = false;
-
-                    thermalSettings.style.display = 'flex';
-
-                    averyInfo.style.display = 'none';
 
                 } else {
 
-                    // Prevent no selection
-                    printModeAvery.checked = true;
-
-                    thermalSettings.style.display = 'none';
-
-                    averyInfo.style.display = 'block';
+                    thermalSettings.style.display = 'flex';
+                    averyInfo.style.display = 'none';
                 }
             }
+            // checkbox event listeners
+            printModeAvery.addEventListener(
+                'change',
+                updatePrintModeUI
+            );
 
-            // Checkbox listeners
-            printModeCheckboxes.forEach(cb => {
-
-                cb.addEventListener('change', () => {
-
-                    // If user tries to uncheck active option,
-                    // keep at least one selected
-                    if (!cb.checked) {
-                        cb.checked = true;
-                    }
-
-                    printModeCheckboxes.forEach(other => {
-                        if (other !== cb) other.checked = false;
-                    });
-
-                    updatePrintModeUI();
-                });
-            });
+            printModeThermal.addEventListener(
+                'change',
+                updatePrintModeUI
+            );
 
             // Initial UI setup
             updatePrintModeUI();
@@ -1060,19 +1054,7 @@
             // Function to check if all required fields have values
             function checkRequiredFields() {
 
-                const basicFieldsFilled =
-                    requiredFields.every(input =>
-                        input.value.trim() !== ''
-                    );
-
-                const levelSelected =
-                    [...levelCheckboxes].some(cb => cb.checked);
-
-                const rackSelected =
-                    [...rackCheckboxes].some(cb => cb.checked);
-
-                generateBtn.disabled =
-                    !(basicFieldsFilled && levelSelected && rackSelected);
+                // no-op highlightMissingFields(false);
             }
 
             // Add event listeners to required fields
@@ -1083,21 +1065,116 @@
             levelCheckboxes.forEach(cb => {
                 cb.addEventListener('change', checkRequiredFields);
             });
-            rackCheckboxes.forEach(cb => {
+            rackRadios.forEach(rb => {
+
+                rb.addEventListener('change', () => {
+
+                    localStorage.setItem(
+                        'lastRackType',
+                        rb.value
+                    );
+
+                });
+
+            });
+
+            // Highlight missing fields
+            function highlightMissingFields() {
+
+                const rackSelected =
+                    [...rackRadios].some(rb => rb.checked);
+
+                const levelSelected =
+                    [...levelCheckboxes].some(cb => cb.checked);
+
+                dom.lotNumber.style.borderColor =
+                    dom.lotNumber.value.trim()
+                        ? '#555'
+                        : '#ff4d4d';
+
+                rackRadios.forEach(rb => {
+
+                    const label =
+                        rb.closest('label') || rb.parentElement;
+
+                    label.style.outline =
+                        rackSelected ? '' : '1px solid #ff4d4d';
+
+                });
+
+                levelCheckboxes.forEach(cb => {
+
+                    const label = cb.closest('label') || cb.parentElement;
+
+                    label.style.outline =
+                        levelSelected ? '' : '1px solid #ff4d4d';
+
+                });
+                return (
+                    rackSelected &&
+                    levelSelected &&
+                    dom.lotNumber.value.trim()
+                );
+            }
+
+            let isGenerating = false;
+
+            let validationTriggered = false;
+
+            dom.lotNumber.addEventListener('input', () => {
+
+                if (!validationTriggered) return;
+
+                dom.lotNumber.style.borderColor =
+                    dom.lotNumber.value.trim()
+                        ? '#555'
+                        : '#ff4d4d';
+
+            });
+
+            rackRadios.forEach(rb => {
+
+                rb.addEventListener('change', () => {
+
+                    if (!validationTriggered) return;
+
+                    const rackSelected =
+                        [...rackRadios].some(x => x.checked);
+
+                    rackRadios.forEach(box => {
+
+                        const label =
+                            box.closest('label') || box.parentElement;
+
+                        label.style.outline =
+                            rackSelected ? '' : '1px solid #ff4d4d';
+                    });
+
+                });
+
+            });
+            
+            levelCheckboxes.forEach(cb => {
 
                 cb.addEventListener('change', () => {
 
-                    // only allow ONE rack type selected
-                    rackCheckboxes.forEach(other => {
-                        if (other !== cb) other.checked = false;
+                    if (!validationTriggered) return;
+
+                    const levelSelected =
+                        [...levelCheckboxes].some(x => x.checked);
+
+                    levelCheckboxes.forEach(box => {
+
+                        const label =
+                            box.closest('label') || box.parentElement;
+
+                        label.style.outline =
+                            levelSelected ? '' : '1px solid #ff4d4d';
                     });
 
-                    checkRequiredFields();
                 });
-            });
 
-            // Initial check in case fields are pre-filled
-            checkRequiredFields();
+            });
 
             // Generate Vial Label
             async function generateVialLabel(pdf, x, y, availableWidth, availableHeight, innerPadding, gap, productName, lot, level, expiry, openStability, serial) {
@@ -1124,16 +1201,24 @@
                 pdf.addImage(canvas.toDataURL('image/png'), 'PNG', barcodeX, barcodeY, barcodeWidth, barcodeHeight);
 
                 const textX = barcodeX + barcodeWidth + gap, textY = y + innerPadding, textWidth = availableWidth - barcodeWidth - gap;
-                let text = `${productName} L${level}\nLot: ${lot} SN: ${serial}`;
+                let text = '';
+
+                if (productName) {
+                    text += `${productName} L${level}`;
+                } else {
+                    text += `Level ${level}`;
+                }
+
+                text += `\nLot: ${lot} SN: ${serial}`;
                 if (expiry) text += `\nExp: ${expiry}`;
                 if (openStability) text += `\nStability: ${openStability}`;
                 text += `\nOpen Date:`;
 
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(4);
+                pdf.setFontSize(6);
                 const lines = pdf.splitTextToSize(text, textWidth);
                 lines.forEach((line, idx) => {
-                    const lineY = textY + (4/72) + idx * 0.06;
+                    const lineY = textY + (6/72) + idx * 0.08;
                     if (lineY <= y + availableHeight + innerPadding) pdf.text(line, textX, lineY);
                 });
             }
@@ -1159,30 +1244,41 @@
 
                 const textX = barcodeX;
                 const textY = barcodeY + barcodeHeight + 0.1;
-                let line1 = productName;
-                if(level) line1 += ` L${level}`;
+                let line1 = productName
+                    ? `${productName} L${level}`
+                    : `Level ${level}`;
                 if(expiry) line1 += ` Exp: ${expiry}`;
                 let line2 = `Lot: ${lot}`;
                 if(openStability) line2 += ` Stability: ${openStability}`;
 
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(4);
+                pdf.setFontSize(6);
                 pdf.text(line1, textX, textY);
-                pdf.text(line2, textX, textY + 0.06);
+                pdf.text(line2, textX, textY + 0.08);
             }
 
             // Main Generate PDF Button
             dom.generateBtn.addEventListener('click', async () => {
-                generateBtn.disabled = true;
+
+                if (!highlightMissingFields()) {
+                    validationTriggered = true;
+                    return;
+                }
+
+                if (isGenerating) return;
+                isGenerating = true;
+
                 generateBtn.textContent = "Generating...";
+                generateBtn.style.opacity = "0.7";
+                generateBtn.style.cursor = "wait";
 
                 await new Promise(resolve => setTimeout(resolve, 0)); // allow UI update before heavy processing
 
                 try {
                 // generation
                 const rackType =
-                [...rackCheckboxes]
-                    .find(cb => cb.checked)?.value || "";
+                    document.querySelector('.rack-radio:checked')
+                        ?.value || "";
                 const productName =
                 dom.productName.value.trim();
                 const lot = dom.lotNumber.value.trim();
@@ -1338,13 +1434,19 @@
                 const safeName = productName.replace(/[<>:"/\\|?*]+/g, '_').replace(/\s+/g, '_');
                 pdf.save(`${safeName}_${printMode}.pdf`);
 
+                // Reset to default state
+                resetBtn.click();
+
 
                 } catch (err) {
                 alert("Barcode generation failed.");
                 console.error(err);
                 } finally {
-                generateBtn.disabled = false;
+                isGenerating = false;
+
                 generateBtn.textContent = "Generate Barcodes";
+                generateBtn.style.opacity = "";
+                generateBtn.style.cursor = "";
                 }
             });
 
@@ -1352,7 +1454,12 @@
 
             resetBtn.addEventListener('click', () => {
                 // Clear text inputs
-                rackCheckboxes.forEach(cb => cb.checked = false);
+                const lastRackType =
+                    localStorage.getItem('lastRackType');
+
+                rackRadios.forEach(rb => {
+                    rb.checked = (rb.value === lastRackType);
+                });
                 dom.productName.value = "";
                 dom.lotNumber.value = "";
                 dom.expiryDate.value = "";
@@ -1381,10 +1488,28 @@
                 // Reset thermal/Avery UI
                 updatePrintModeUI();
                 // Reset Generate button
-                checkRequiredFields();
 
-                // Focus first input
-                //document.getElementById('racktype').focus(); // remove
+                validationTriggered = false;
+
+                dom.productName.style.borderColor = '#555';
+                dom.lotNumber.style.borderColor = '#555';
+
+                rackRadios.forEach(rb => {
+
+                    const label =
+                        rb.closest('label') || rb.parentElement;
+
+                    label.style.outline = '';
+                });
+
+                levelCheckboxes.forEach(cb => {
+
+                    const label =
+                        cb.closest('label') || cb.parentElement;
+
+                    label.style.outline = '';
+                });
+
             });
             
 
