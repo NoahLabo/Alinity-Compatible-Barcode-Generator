@@ -473,7 +473,9 @@
             width: 90%;
             max-width: 420px;
 
-            margin: 10% auto;
+            margin: 40px auto;
+
+            box-sizing: border-box;
 
             padding: 20px;
 
@@ -484,6 +486,9 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.6);
 
             position: relative;
+
+            max-height: calc(100% - 80px);
+            overflow-y: auto;
         }
 
         .modal-content h3 {
@@ -494,16 +499,38 @@
         .modal-content ul {
             padding-left: 20px;
         }
+        .modal-content h4{
+
+            color:#FFAB00;
+            margin-bottom:6px;
+
+        }
+
+        .modal-content hr{
+
+            border:none;
+            border-top:1px solid #444;
+            margin:20px 0;
+
+        }
+
+        .modal-content li{
+
+            margin-bottom:6px;
+
+        }
 
         .close-modal {
 
-            position: absolute;
+            position: sticky;
+            float: right;
 
-            top: 10px;
-            right: 15px;
+            top: 0;
 
-            font-size: 22px;
-
+            font-size: 24px;
+            z-index: 5;
+            background: #1E1E1E;
+            padding-left: 10px;
             cursor: pointer;
 
             color: #AAA;
@@ -523,6 +550,43 @@
 
         .print-instruction strong {
             color: #FFAB00;
+        }
+        .guide-container {
+            display: flex;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+
+        .description{
+            text-align:center;
+            max-width:520px;
+            margin:0 auto 16px;
+            line-height:1.45;
+            color:#CCCCCC;
+        }
+        .guide-button {
+            background-color: #2C2C2C;
+            color: #FFAB00;
+            border: 1px solid #555;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .guide-button:hover {
+            background-color: #3A3A3A;
+            border-color: #FFAB00;
+            color: #FFD54F;
+            box-shadow: 0 0 8px rgba(255,171,0,0.35);
+            transform: translateY(-1px);
+        }
+
+        .guide-button:active {
+            transform: translateY(0);
+            box-shadow: none;
         }
 
         @media (max-width: 600px) {
@@ -545,24 +609,34 @@
                 padding: 20px 12px;
             }
 
-            table,
-            tbody,
-            tr,
-            td {
-                display: block;
+            /* Keep table layout on phones */
+            table {
                 width: 100%;
+                table-layout: fixed;
+            }
+
+            tbody {
+                display: table-row-group;
             }
 
             tr {
-                margin-bottom: 4px;
+                display: table-row;
             }
 
             td {
-                padding: 4px 0;
+                display: table-cell;
+                vertical-align: top;
+                padding: 6px 4px;
             }
 
             td:first-child {
-                margin-bottom: 4px;
+                width: 28%;
+                white-space: nowrap;
+                padding-top: 10px;
+            }
+
+            td:last-child {
+                width: 72%;
             }
 
             input,
@@ -571,25 +645,76 @@
                 font-size: 16px;
             }
 
-            .rack-grid,
-            .level-grid,
+
+            .rack-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .level-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
             .printmode-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .rack-option,
+            .level-grid label,
+            .printmode-option {
+                padding: 6px;
+                font-size: 13px;
+            }
+
+            .rack-option input,
+            .level-grid input,
+            .printmode-option input {
+                transform: scale(1);
+            }
+
+            td:first-child label{
+
+                font-size:13px;
+                font-weight:600;
+
+            }
+
+            input,
+            select{
+
+                padding:7px 8px;
+
             }
 
             .thermal-inline {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 6px;
+                flex-wrap: nowrap;
+                margin: 0 auto 15px auto;
             }
 
             .inline-group {
-                width: 100%;
-                justify-content: right;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                flex: 1;
+            }
+
+            .inline-group span {
+                font-size: 13px;
+                white-space: nowrap;
             }
 
             .inline-group input {
-                width: 100px;
+                width: 100%;
+                min-width: 0;
+                padding: 6px;
+                font-size: 13px;
             }
 
             .button-row {
@@ -607,8 +732,11 @@
             }
 
             .modal-content {
-                margin-top: 20%;
-                width: calc(100% - 24px);
+                width: 94%;
+                margin: 20px auto;
+                max-width: none;
+                max-height: calc(100vh - 40px);
+                box-sizing: border-box;
             }
 
             .button-row {
@@ -629,9 +757,13 @@
         <h2>QC Barcode Generator for Abbott Alinity Analyzers</h2>
 
         <p class="description">
-            This tool generates QC barcode labels for Abbott Alinity analyzers. Barcodes are created in DataMatrix format for vial racks and Code 128 for sample racks, supporting automated QC processing.
+            Create printable QC barcode labels that support automated QC processing on Abbott Alinity analyzers, helping reduce manual entry and streamline laboratory workflow.
         </p>
-
+        <div class="guide-container">
+            <button type="button" id="guideBtn" class="guide-button">
+                📖 Quick Start Guide
+            </button>
+        </div>
         <div class="form-container">
             <table border="0">
                 <tr>
@@ -678,13 +810,6 @@
                         <label for="lotNumber">
                             Lot Number <span style="color:red;">*</span>
 
-                            <span
-                                class="help-icon"
-                                id="lotHelpBtn"
-                                title="Lot Number Help"
-                            >
-                                ?
-                            </span>
                         </label>
                     </td>
                     <td><input type="text" id="lotNumber" required></td>
@@ -851,29 +976,141 @@
             © 2026 LabPal. All rights reserved.
         </div>
 
-        <div id="lotHelpModal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal" id="closeLotHelp">
-                    &times;
-                </span>
+        <div id="guideModal" class="modal">
 
-                <h3>Lot Number Information</h3>
+        <div class="modal-content" style="max-width:650px;">
 
-                <p>
-                    Enter the lot number exactly as it is registered
-                    in the Alinity system.
-                </p>
+        <span class="close-modal" id="closeGuide">
+            &times;
+        </span>
 
-                <p>
-                    The barcode generated for vial and sample racks
-                    is based on this value. Incorrect formatting or
-                    mismatched lot numbers may prevent proper QC
-                    recognition by the analyzer.
-                </p>
+        <h3>Quick Start Guide</h3>
 
-                </ul>
-            </div>
+        <hr>
+
+        <h4>Step 1 — Select Rack Type</h4>
+
+        <p>
+        Choose the rack type that matches your workflow.
+        </p>
+
+        <ul>
+        <li><b>Vial rack</b> – DataMatrix barcode applied directly to the QC vial rack.</li>
+
+        <li><b>Sample rack</b> – Code 128 barcode applied to a sample tube.</li>
+        </ul>
+
+        <p>
+        <b>No additional programming or configuration is required on the Alinity analyzer.</b>
+        Simply choose the rack type appropriate for your workflow.
+        </p>
+
+        <div style="display:flex;gap:20px;justify-content:center;margin:15px 0;">
+
+        <div style="text-align:center">
+        <img src="images/vial-example.png"
+            style="max-width:180px;border-radius:6px;">
+        <br>
+        <small>Vial Rack</small>
         </div>
+
+        <div style="text-align:center">
+        <img src="images/sample-example.png"
+            style="max-width:180px;border-radius:6px;">
+        <br>
+        <small>Sample Rack</small>
+        </div>
+
+        </div>
+
+        <hr>
+
+        <h4>Step 2 — Enter QC Information</h4>
+
+        <p>Required fields:</p>
+
+        <ul>
+        <li>Rack Type</li>
+        <li>Lot Number</li>
+        <li>At least one QC Level</li>
+        </ul>
+
+        <p>
+        Optional fields:
+        </p>
+
+        <ul>
+        <li>Product Name</li>
+        <li>Expiration Date</li>
+        <li>Open Stability</li>
+        </ul>
+
+        <p>
+
+        <b>Important:</b>
+
+        Enter the <b>Lot Number exactly as it is registered in the Alinity system.</b>
+
+        Even one incorrect character may prevent proper QC recognition.
+
+        </p>
+
+        <hr>
+
+        <h4>Step 3 — Choose Output Type</h4>
+
+        <p><b>Full Sheet (Avery 5195)</b></p>
+
+        <ul>
+        <li>Creates a 60-label Avery sheet.</li>
+        <li>Labels are automatically divided among selected QC levels.</li>
+        </ul>
+
+        <p><b>Custom (inch)</b></p>
+
+        <ul>
+        <li>Designed for thermal label printers.</li>
+        <li>Select Width, Height and Quantity.</li>
+        <li>The chosen quantity is produced for every selected level.</li>
+        </ul>
+
+        <p>
+
+        <b>Show Borders</b> adds a thin outline around each label to help with alignment or cutting.
+
+        </p>
+
+        <hr>
+
+        <h4>Step 4 — Generate & Print</h4>
+
+        <ul>
+
+        <li>Click <b>Generate Barcodes</b>.</li>
+
+        <li>The PDF downloads automatically.</li>
+
+        <li>Print using <b>Actual Size / 100% Scale</b>.</li>
+
+        <li>The <b>Reset</b> button clears the form while remembering your last Rack Type.</li>
+
+        </ul>
+
+        <hr>
+
+        <h4>Step 5 — Support LabPal</h4>
+
+        <p>
+
+        If this tool saves you time, consider supporting future improvements.
+
+        Every coffee helps keep LabPal free and growing.
+
+        </p>
+
+        </div>
+
+        </div>        
         <script>
             const dom = {
             // Inputs
@@ -901,9 +1138,9 @@
             averyInfo: document.getElementById('averyInfo'),
 
             // Modal
-            lotHelpBtn: document.getElementById('lotHelpBtn'),
-            lotHelpModal: document.getElementById('lotHelpModal'),
-            closeLotHelp: document.getElementById('closeLotHelp')
+            guideBtn: document.getElementById("guideBtn"),
+            guideModal: document.getElementById("guideModal"),
+            closeGuide: document.getElementById("closeGuide"),
             };
 
             const expiryInput = dom.expiryDate;
@@ -1511,26 +1748,18 @@
                 });
 
             });
-            
 
-            const lotHelpBtn = dom.lotHelpBtn;
-
-            const lotHelpModal = dom.lotHelpModal;
-
-            const closeLotHelp = dom.closeLotHelp;
-
-            lotHelpBtn.addEventListener('click', () => {
-                lotHelpModal.style.display = 'block';
+            dom.guideBtn.addEventListener("click", () => {
+                dom.guideModal.style.display = "block";
             });
 
-            closeLotHelp.addEventListener('click', () => {
-                lotHelpModal.style.display = 'none';
+            dom.closeGuide.addEventListener("click", () => {
+                dom.guideModal.style.display = "none";
             });
 
-            window.addEventListener('click', (e) => {
-
-                if(e.target === lotHelpModal){
-                    lotHelpModal.style.display = 'none';
+            window.addEventListener("click", e => {
+                if (e.target === dom.guideModal) {
+                    dom.guideModal.style.display = "none";
                 }
             });
 
